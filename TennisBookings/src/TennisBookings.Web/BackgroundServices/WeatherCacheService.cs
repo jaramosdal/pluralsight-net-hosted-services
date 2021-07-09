@@ -17,8 +17,8 @@ namespace TennisBookings.Web.BackgroundServices
         private readonly IDistributedCache<CurrentWeatherResult> _cache;
         private readonly ILogger<WeatherCacheService> _logger;
 
-        public readonly int _minutesToCache { get; set; }
-        public readonly int _refreshIntervalInSeconds { get; set; }
+        private readonly int _minutesToCache;
+        private readonly int _refreshIntervalInSeconds;
 
         public WeatherCacheService(
             IWeatherApiClient weatherApiClient,
@@ -29,7 +29,7 @@ namespace TennisBookings.Web.BackgroundServices
             _weatherApiClient = weatherApiClient;
             _cache = cache;
             _logger = logger;
-            _minutesToCache = options.Get(ExternalServiceConfig.WeatherApi).MinsToCache;
+            _minutesToCache = options.Get(ExternalServicesConfig.WeatherApi).MinsToCache;
             _refreshIntervalInSeconds = _minutesToCache > 1 ? (_minutesToCache - 1) * 60 : 30;
         }
 

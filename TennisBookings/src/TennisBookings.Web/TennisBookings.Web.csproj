@@ -28,7 +28,4 @@
     <ItemGroup>
       <None Remove="BackgroundService\" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="BackgroundServices\" />
-    </ItemGroup>
 </Project>
