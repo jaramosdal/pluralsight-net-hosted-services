@@ -77,6 +77,7 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
                 }
             }
 
+            // Indica que el canal se ha completado, lo que significa que ya no habrá más mensajes de ahora en adelante
             _sqsMessageChannel.TryCompleteWriter();
         }
     }

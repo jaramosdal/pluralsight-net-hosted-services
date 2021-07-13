@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -10,5 +10,9 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.100.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.3.110.21" />
     <PackageReference Include="AWSSDK.SQS" Version="3.3.102.50" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TennisBookings.ResultsProcessing\TennisBookings.ResultsProcessing.csproj" />
   </ItemGroup>
 </Project>

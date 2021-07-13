@@ -4,7 +4,10 @@ using Amazon.SQS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TennisBookings.ResultsProcessing;
 using TennisBookings.ScoreProcessor.BackgroundServices;
+using TennisBookings.ScoreProcessor.Processing;
+using TennisBookings.ScoreProcessor.S3;
 using TennisBookings.ScoreProcessor.Sqs;
 
 namespace TennisBookings.ScoreProcessor
@@ -23,6 +26,7 @@ namespace TennisBookings.ScoreProcessor
                     services.Configure<AwsServicesConfiguration>(hostContext.Configuration.GetSection("AWS"));
 
                     services.AddAWSService<IAmazonSQS>();
+                    services.AddAWSService<IAmazonS3>();
 
                     var useLocalStack = hostContext.Configuration.GetValue<bool>("UseLocalStack");
 
@@ -39,11 +43,19 @@ namespace TennisBookings.ScoreProcessor
                         });
                     }
 
+                    services.AddTransient<IScoreProcessor, AwsScoreProcessor>();
+                    services.AddSingleton<IS3EventNotificationMessageParser, S3EventNotificationMessageParser>();
+                    services.AddSingleton<IS3DataProvider, S3DataProvider>();
+                    services.AddTennisPlayerApiClient(options => options.BaseAddress = hostContext.Configuration.GetSection("ExternalServices:TennisPlayersApi")["Url"]);
+                    services.AddStatisticsApiClient(options => options.BaseAddress = hostContext.Configuration.GetSection("ExternalServices:StatisticsApi")["Url"]);
+                    services.AddResultProcessing();
+
                     services.AddSingleton<ISqsMessageChannel, SqsMessageChannel>();
                     services.AddSingleton<ISqsMessageDeleter, SqsMessageDeleter>();
                     services.AddSingleton<ISqsMessageQueue, SqsMessageQueue>();
 
                     services.AddHostedService<QueueReadingService>();
+                    services.AddHostedService<ScoreProcessingService>();
                 });
     }
 }
