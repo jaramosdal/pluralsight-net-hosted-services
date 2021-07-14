@@ -27,6 +27,8 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("Started score processing service.");
+
             await foreach (var message in _sqsMessageChannel.Reader.ReadAllAsync(stoppingToken))
             {        
                 _logger.LogInformation("Read message to process from channel.");

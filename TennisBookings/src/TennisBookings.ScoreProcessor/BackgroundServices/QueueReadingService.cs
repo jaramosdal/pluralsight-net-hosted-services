@@ -51,30 +51,40 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
             {
                 ReceivesAttempted++;
 
-                var receiveMessageResponse =
+                // El try...catch no es del curso, lo puse yo para ver los posibles fallos del ejemplo
+                try
+                {
+                    var receiveMessageResponse =
                     await _sqsMessageQueue.ReceiveMessageAsync(receiveMessageRequest, stoppingToken);
 
-                if (receiveMessageResponse.HttpStatusCode == HttpStatusCode.OK &&
-                    receiveMessageResponse.Messages.Any())
-                {
-                    MessagesReceived += receiveMessageResponse.Messages.Count;
+                    if (receiveMessageResponse.HttpStatusCode == HttpStatusCode.OK &&
+                        receiveMessageResponse.Messages.Any())
+                    {
+                        MessagesReceived += receiveMessageResponse.Messages.Count;
 
-                    _logger.LogInformation("Received {MessageCount} messages from the queue.",
-                        receiveMessageResponse.Messages.Count);
+                        _logger.LogInformation("Received {MessageCount} messages from the queue.",
+                            receiveMessageResponse.Messages.Count);
 
-                    await _sqsMessageChannel.WriteMessagesAsync(receiveMessageResponse.Messages, stoppingToken);
+                        await _sqsMessageChannel.WriteMessagesAsync(receiveMessageResponse.Messages, stoppingToken);
+                    }
+                    else if (receiveMessageResponse.HttpStatusCode == HttpStatusCode.OK)
+                    {
+                        _logger.LogInformation("No messages received. Attempting receive again in 1 minute.",
+                            receiveMessageResponse.Messages.Count);
+
+                        await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                    }
+                    else if (receiveMessageResponse.HttpStatusCode != HttpStatusCode.OK)
+                    {
+                        _logger.LogError("Unsuccessful response from AWS SQS.");
+                    }
                 }
-                else if (receiveMessageResponse.HttpStatusCode == HttpStatusCode.OK)
+                catch (Exception ex)
                 {
-                    _logger.LogInformation("No messages received. Attempting receive again in 1 minute.",
-                        receiveMessageResponse.Messages.Count);
-
+                    _logger.LogError(ex.Message);
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
-                else if (receiveMessageResponse.HttpStatusCode != HttpStatusCode.OK)
-                {
-                    _logger.LogError("Unsuccessful response from AWS SQS.");
-                }
+
             }
 
             // Indica que el canal se ha completado, lo que significa que ya no habrá más mensajes de ahora en adelante
