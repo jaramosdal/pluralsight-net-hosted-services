@@ -47,13 +47,13 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
                 WaitTimeSeconds = 5
             };
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                ReceivesAttempted++;
-
-                // El try...catch no es del curso, lo puse yo para ver los posibles fallos del ejemplo
-                try
+                while (!stoppingToken.IsCancellationRequested)
                 {
+                    ReceivesAttempted++;
+
+
                     var receiveMessageResponse =
                     await _sqsMessageQueue.ReceiveMessageAsync(receiveMessageRequest, stoppingToken);
 
@@ -79,16 +79,21 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
                         _logger.LogError("Unsuccessful response from AWS SQS.");
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message);
-                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-                }
-
             }
-
-            // Indica que el canal se ha completado, lo que significa que ya no habrá más mensajes de ahora en adelante
-            _sqsMessageChannel.TryCompleteWriter();
+            catch (OperationCanceledException)
+            {
+                _logger.OperationCancelledExceptionOccurred();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "An unhandled exception was thrown.");
+                _sqsMessageChannel.CompleteWriter();
+            }
+            finally
+            {
+                // Indica que el canal se ha completado, lo que significa que ya no habrá más mensajes de ahora en adelante
+                _sqsMessageChannel.TryCompleteWriter();
+            }
         }
     }
 }
