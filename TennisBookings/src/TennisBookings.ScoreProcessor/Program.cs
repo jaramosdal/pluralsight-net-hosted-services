@@ -23,6 +23,11 @@ namespace TennisBookings.ScoreProcessor
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.PostConfigure<HostOptions>(option =>
+                    {
+                        option.ShutdownTimeout = TimeSpan.FromSeconds(60);
+                    });
+
                     services.Configure<AwsServicesConfiguration>(hostContext.Configuration.GetSection("AWS"));
 
                     services.AddAWSService<IAmazonSQS>();
@@ -54,8 +59,8 @@ namespace TennisBookings.ScoreProcessor
                     services.AddSingleton<ISqsMessageDeleter, SqsMessageDeleter>();
                     services.AddSingleton<ISqsMessageQueue, SqsMessageQueue>();
 
-                    services.AddHostedService<QueueReadingService>();
                     services.AddHostedService<ScoreProcessingService>();
+                    services.AddHostedService<QueueReadingService>();
                 });
     }
 }

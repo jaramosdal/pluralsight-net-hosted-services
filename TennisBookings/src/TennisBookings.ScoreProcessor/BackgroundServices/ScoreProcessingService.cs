@@ -66,6 +66,7 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
             {
                 // Al llegar aquí, puede que la aplicación ya esté parando por ejemplo en caso de OperationCanceledException.
                 // No pasa nada por llamar a StopApplication varias veces, sólo la primera tiene efecto
+                // Cuando la aplicación se cierra de forma correcta, el token de cancelación pasado a cada método ExecuteAsync de los BackgroundService se marcará como cancelado
                 _hostApplicationLifetime.StopApplication();
             }
         }
