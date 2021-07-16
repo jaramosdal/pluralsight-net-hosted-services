@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,6 +70,15 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
                 // Cuando la aplicación se cierra de forma correcta, el token de cancelación pasado a cada método ExecuteAsync de los BackgroundService se marcará como cancelado
                 _hostApplicationLifetime.StopApplication();
             }
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+
+            await base.StopAsync(cancellationToken);
+
+            _logger.LogInformation("Completed shutdown in {Milliseconds}ms.", sw.ElapsedMilliseconds);
         }
     }
 }
