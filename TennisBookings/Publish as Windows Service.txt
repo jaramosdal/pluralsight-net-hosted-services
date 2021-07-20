@@ -1,0 +1,5 @@
+#Publish
+dotnet publish -r win-x64 -c Release -o C:\Publish\win-service /p:PublishSingleFile=true /p:DebugType=None
+
+#Create Windows Service
+sc create ScoreProcessor binPath= C:\Publish\win-service\TennisBookings.ScoreProcessor.exe start= delayed-auto
