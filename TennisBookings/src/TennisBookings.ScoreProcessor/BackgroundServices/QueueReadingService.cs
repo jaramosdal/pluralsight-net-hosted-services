@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TennisBookings.ScoreProcessor.Logging;
@@ -35,15 +34,6 @@ namespace TennisBookings.ScoreProcessor.BackgroundServices
             _queueUrl = options.Value.NewScoresQueueUrl;
 
             _logger.LogInformation($"Reading from {_queueUrl}");
-
-            if (WindowsServiceHelpers.IsWindowsService())
-            {
-                _logger.LogInformation($"Running as Windows service!");
-            }
-            else
-            {
-                _logger.LogInformation($"Not running as Windows service!");
-            }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
